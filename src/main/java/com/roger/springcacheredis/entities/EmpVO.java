@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * @author RogerLo
  * @date 2025/3/19
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EmpVO {
+public class EmpVO implements Serializable {
     private int empNo;
     private String empName;
     private Integer empAge;

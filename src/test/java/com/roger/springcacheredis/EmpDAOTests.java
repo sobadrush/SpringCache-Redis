@@ -20,4 +20,11 @@ class EmpDAOTests {
         System.out.println(empDAO.getEmp(7003));
     }
 
+    @Test
+    @DisplayName("[Test-002] 測試 EmpDAO + @Cacheable (REDIS 設定多組 TTL)")
+    void test_002() {
+        System.out.println(empDAO.getEmpById(7001));
+        System.out.println(empDAO.getEmpById(7002));
+        System.out.println(empDAO.getEmpById(7003));
+    }
 }

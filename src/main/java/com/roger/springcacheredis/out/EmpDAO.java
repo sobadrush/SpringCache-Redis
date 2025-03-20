@@ -4,6 +4,7 @@ import com.roger.springcacheredis.entities.EmpVO;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -28,6 +29,20 @@ public class EmpDAO {
     /**
      * 取得員工資料 && 緩存
      */
+    @Caching(cacheable = {
+        @Cacheable(cacheNames = "MY_CACHED_A", key = "#empId + 0"),
+        @Cacheable(cacheNames = "MY_CACHED_B", key = "#empId + 10"),
+        @Cacheable(cacheNames = "MY_CACHED_C", key = "#empId + 100")
+    })
+    public EmpVO getEmpById(int empId) {
+        System.out.println("[ 呼叫 - getEmpById ] Fetching user from DB: " + empId);
+        return EMP_DB.stream().filter(empVO -> empVO.getEmpNo() == empId).findFirst().get();
+    }
+
+
+    /**
+     * 取得員工資料 && 緩存
+     */
     @Cacheable(cacheNames = "empCache", key = "#empId")
     public EmpVO getEmp(int empId) {
         System.out.println("[ 呼叫 - getEmp ] Fetching user from DB: " + empId);
@@ -41,9 +56,9 @@ public class EmpDAO {
     public String updateEmp(int empId, String name) {
         System.out.println("Updating user in DB: " + empId);
         EMP_DB.stream()
-                .filter(empVO -> empVO.getEmpNo() == empId && empVO.getEmpName().equals(name))
-                .findFirst().get()
-                .setEmpName(name);
+            .filter(empVO -> empVO.getEmpNo() == empId && empVO.getEmpName().equals(name))
+            .findFirst().get()
+            .setEmpName(name);
         return name;
     }
 
