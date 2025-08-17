@@ -26,20 +26,20 @@ public class CacheConfig {
     // 預設會使用主要的 CacheManager，使用 DB 0
     @Bean
     @Primary
-    public CacheManager primaryCacheManager(@Qualifier("redisConnectionFactoryDb0") LettuceConnectionFactory redisConnectionFactoryDb0) {
-        return this.createCacheManager(redisConnectionFactoryDb0);
+    public CacheManager primaryCacheManager(@Qualifier("redisConnectionFactoryDb0") LettuceConnectionFactory factoryDb0) {
+        return this.createCacheManager(factoryDb0);
     }
 
     // 員工快取，使用 DB 6
     @Bean("empCacheManager")
-    public CacheManager empCacheManager(@Qualifier("redisConnectionFactoryDb6") LettuceConnectionFactory redisConnectionFactoryDb6) {
-        return this.createCacheManager(redisConnectionFactoryDb6);
+    public CacheManager empCacheManager(@Qualifier("redisConnectionFactoryDb6") LettuceConnectionFactory factoryDb6) {
+        return this.createCacheManager(factoryDb6);
     }
 
-    // 產品快取，使用 DB 2
-    @Bean("productsCacheManager")
-    public CacheManager productsCacheManager(@Qualifier("redisConnectionFactoryDb2") LettuceConnectionFactory redisConnectionFactoryDb2) {
-        return this.createCacheManager(redisConnectionFactoryDb2);
+    // 部門快取，使用 DB 8
+    @Bean("deptCacheManager")
+    public CacheManager deptCacheManager(@Qualifier("redisConnectionFactoryDb8") LettuceConnectionFactory factoryDb8) {
+        return this.createCacheManager(factoryDb8);
     }
 
     /**
@@ -47,6 +47,7 @@ public class CacheConfig {
      */
     private CacheManager createCacheManager(LettuceConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .computePrefixWith(cacheName -> cacheName + ":") // 改成單冒號, 避免 Another Redis Desktop Manager 解析預設的 :: 會出現 [empty]
                 .entryTtl(Duration.ofSeconds(cacheTtl))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(new StringRedisSerializer()))
@@ -58,4 +59,5 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .build();
     }
+
 }

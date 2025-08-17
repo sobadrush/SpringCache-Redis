@@ -6,8 +6,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.roger.springcacheredis.entities.MockData.EMP_DB;
 
 /**
  * @author RogerLo
@@ -15,15 +14,6 @@ import java.util.List;
  */
 @Repository
 public class EmpDAO {
-
-    // 模擬資料庫
-    private static final List<EmpVO> EMP_DB = new ArrayList<>();
-
-    static {
-        EMP_DB.add(EmpVO.builder().empNo(7001).empName("Roger").empAge(21).build());
-        EMP_DB.add(EmpVO.builder().empNo(7002).empName("Kelly").empAge(22).build());
-        EMP_DB.add(EmpVO.builder().empNo(7003).empName("Cathy").empAge(23).build());
-    }
 
     /**
      * 取得員工資料 && 緩存

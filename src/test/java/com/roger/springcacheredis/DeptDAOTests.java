@@ -1,6 +1,6 @@
 package com.roger.springcacheredis;
 
-import com.roger.springcacheredis.out.EmpDAO;
+import com.roger.springcacheredis.out.DeptDAO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +9,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.stream.IntStream;
 
 @SpringBootTest
-class EmpDAOTests {
+class DeptDAOTests {
 
     @Autowired
-    private EmpDAO empDAO;
+    private DeptDAO deptDAO;
 
     @Test
-    @DisplayName("[Test-001] 測試 EmpDAO + @Cacheable (員工快取，使用 DB 6)")
+    @DisplayName("[Test-001] 測試 DeptDAO + @Cacheable")
     void test_001() {
         IntStream.range(0, 10).forEach(i -> {
-            System.out.println(empDAO.getEmp(7001));
-            System.out.println(empDAO.getEmp(7002));
-            System.out.println(empDAO.getEmp(7003));
+            System.out.println(deptDAO.getDept(111L));
+            System.out.println(deptDAO.getDept(222L));
+            System.out.println(deptDAO.getDept(333L));
             System.out.println("===================================");
         });
     }

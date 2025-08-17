@@ -17,4 +17,5 @@ public class EmpVO {
     private int empNo;
     private String empName;
     private Integer empAge;
+    private DeptVO deptVO;
 }

@@ -50,8 +50,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public LettuceConnectionFactory redisConnectionFactoryDb2() {
-        return this.createLettuceConnectionFactory(2);
+    public LettuceConnectionFactory redisConnectionFactoryDb8() {
+        return this.createLettuceConnectionFactory(8);
     }
 
 
@@ -69,7 +69,7 @@ public class RedisConfig {
         log.info("=== 開始創建 Redis Sentinel 連接工廠 (DB: {}) ===", database);
 
         // 解析 Sentinel 節點
-        List<String> nodeList = parseSentinelNodes(sentinelNodes);
+        List<String> nodeList = this.parseSentinelNodes(sentinelNodes);
         log.info("解析到的 Sentinel 節點: {}", nodeList);
 
         // 創建 RedisSentinelConfiguration - 關鍵：不使用鏈式調用
@@ -123,23 +123,31 @@ public class RedisConfig {
 
         // 創建客戶端配置 - 讓 Spring Boot 使用預設的 ClientResources
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                // 設定命令超時時間 : 當一個命令在指定時間內未完成時，將會拋出一個 TimeoutException
                 .commandTimeout(Duration.ofSeconds(timeoutMs))
+                // 設定關閉超時時間 : 當關閉 Redis 連接時，等待指定時間讓其完成
                 .shutdownTimeout(Duration.ofSeconds(5))
                 .clientOptions(ClientOptions.builder()
+                        // 設定當連接斷開時的行為 : REJECT_COMMANDS 表示會立即拒絕新的命令
                         .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
+                        // 設定使用的 Redis 協議版本 : RESP2 是 Redis 6 之前的版本，相容性好
                         .protocolVersion(ProtocolVersion.RESP2)
                         .socketOptions(SocketOptions.builder()
+                                // 設定 TCP 連接超時時間
                                 .connectTimeout(Duration.ofSeconds(timeoutMs))
+                                // 啟用 TCP KeepAlive : 保持長連接，防止因網路閒置而被中斷
                                 .keepAlive(true)
+                                // 啟用 TCP NoDelay : 禁用 Nagle 演算法，降低延遲
                                 .tcpNoDelay(true)
                                 .build())
+                        // 設定命令超時選項 : 這裡的 fixedTimeout 與上面的 commandTimeout 作用類似，用於更細粒度的超時控制
                         .timeoutOptions(TimeoutOptions.builder()
                                 .fixedTimeout(Duration.ofSeconds(timeoutMs))
                                 .build())
                         .build())
                 .build();
 
-        log.info("客戶端配置創建完成");
+        log.info("Lettuce 客戶端配置創建完成");
 
         // 創建連接工廠 - 這裡是關鍵！
         LettuceConnectionFactory factory = new LettuceConnectionFactory(sentinelConfig, clientConfig);
@@ -172,7 +180,7 @@ public class RedisConfig {
         }
 
         // 支援多種分隔符
-        String[] nodeArray = nodes.split("[,;\\s]+");
+        String[] nodeArray = nodes.split("[,;\s]+");
         List<String> result = new ArrayList<>();
 
         for (String node : nodeArray) {
@@ -193,25 +201,4 @@ public class RedisConfig {
         log.info("成功解析 {} 個 Sentinel 節點: {}", result.size(), result);
         return result;
     }
-
-    // @Bean
-    // public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory redisConnectionFactoryDb0) {
-    //     log.info("創建 RedisTemplate");
-    //
-    //     RedisTemplate<String, Object> template = new RedisTemplate<>();
-    //     template.setConnectionFactory(redisConnectionFactoryDb0);
-    //
-    //     // 設定序列化器
-    //     template.setKeySerializer(new StringRedisSerializer());
-    //     template.setHashKeySerializer(new StringRedisSerializer());
-    //     template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-    //     template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
-    //
-    //     template.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
-    //
-    //     template.afterPropertiesSet();
-    //     log.info("RedisTemplate 創建完成");
-    //
-    //     return template;
-    // }
 }
