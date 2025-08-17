@@ -1,5 +1,8 @@
 package com.roger.springcacheredis;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -46,13 +49,31 @@ public class CacheConfig {
      * 創建 RedisCacheManager，使用 LettuceConnectionFactory 和預設的序列化配置
      */
     private CacheManager createCacheManager(LettuceConnectionFactory connectionFactory) {
+        // 配置 ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // 1. 啟用根元素包裝，讓 List 可以被一個 JSON Object 包裹
+        // objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
+        // objectMapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
+
+        // 2. 使用 @class 屬性來儲存類型資訊
+        // 啟用 Jackson 的多型類型資訊，序列化時會在 JSON 中加入 @class 屬性，
+        // 以便反序列化時能正確還原物件的具體類型（僅限非 final 類型），
+        // 並使用 LaissezFaireSubTypeValidator 來驗證子型別，提升安全性
+        objectMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
+
+        // 創建 RedisCacheConfiguration
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .computePrefixWith(cacheName -> cacheName + ":") // 改成單冒號, 避免 Another Redis Desktop Manager 解析預設的 :: 會出現 [empty]
                 .entryTtl(Duration.ofSeconds(cacheTtl))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper))) // <--- 使用配置好的 ObjectMapper
                 .disableCachingNullValues();
 
         return RedisCacheManager.builder(connectionFactory)

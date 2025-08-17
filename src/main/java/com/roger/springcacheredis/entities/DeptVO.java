@@ -1,5 +1,6 @@
 package com.roger.springcacheredis.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class DeptVO {
     private Long id;
     private String deptName;
     private String deptLoc;
+    @JsonManagedReference
     private Set<EmpVO> emps;
 }

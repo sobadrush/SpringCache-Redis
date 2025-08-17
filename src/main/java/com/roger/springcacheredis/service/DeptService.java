@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author RogerLo
@@ -21,12 +22,10 @@ public class DeptService {
      */
     @Cacheable(cacheNames = "empListCache", key = "#root.methodName + '_' + #deptId", cacheManager = "primaryCacheManager")
     public List<EmpVO> getEmpsByDeptId(long deptId) {
-        return List.of(
-                MockData.EMP_DB
-                        .stream()
-                        .filter(emp -> emp.getDeptVO().getId() == deptId)
-                        .toArray(EmpVO[]::new)
-        );
+        return MockData.EMP_DB
+                .stream()
+                .filter(emp -> emp.getDeptVO().getId() == deptId)
+                .collect(Collectors.toList());
     }
 
 }
