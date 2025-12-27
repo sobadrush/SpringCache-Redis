@@ -34,7 +34,7 @@ public class CachedConfig {
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, GenericJackson2JsonRedisSerializer serializer) {
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofHours(8)) // 默認沒特別指定的 cache 都會走這個規則
-            .computePrefixWith(cacheName -> "caching:" + cacheName)
+            .computePrefixWith(cacheName -> "default_caching:" + cacheName) // 設定緩存 key 的前綴字串
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
 
         // 🚩針對不同 cacheName，設置不同的過期時間
@@ -42,10 +42,12 @@ public class CachedConfig {
 
             put("MY_CACHED_A", RedisCacheConfiguration.defaultCacheConfig()
                     .entryTtl(Duration.ofMinutes(1))
+                    .computePrefixWith(cacheName -> cacheName + ":") // 設定緩存 key 的前綴字串(將原生的 :: 改為 :)
                     .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))); // 1 分鐘
 
             put("MY_CACHED_B", RedisCacheConfiguration.defaultCacheConfig()
                     .entryTtl(Duration.ofSeconds(20))
+                    .computePrefixWith(cacheName -> cacheName + ":") // 設定緩存 key 的前綴字串(將原生的 :: 改為 :)
                     .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))); // 20 秒
 
             // ...
