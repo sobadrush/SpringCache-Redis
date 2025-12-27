@@ -45,6 +45,7 @@ public class EmpDAO {
      */
     // @Cacheable(cacheNames = "empCache", key = "#empId")
     @Cacheable(cacheNames = "empCache#9527", key = "#empId")
+    // @Cacheable(cacheNames = "empCache#9527", keyGenerator = "myCustomKeyGenerator") // 也可使用自訂的 keyGenerator
     public EmpVO getEmp(int empId) {
         System.out.println("[ 呼叫 - getEmp ] Fetching user from DB: " + empId);
         return EMP_DB.stream().filter(empVO -> empVO.getEmpNo() == empId).findFirst().get();
